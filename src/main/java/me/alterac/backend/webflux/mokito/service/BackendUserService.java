@@ -1,4 +1,4 @@
-package me.alterac.backend.webflux.service;
+package me.alterac.backend.webflux.mokito.service;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -29,11 +29,11 @@ public class BackendUserService implements ReactiveUserDetailsService {
             }
             return User.withUsername(username)
                     .password(backendUser.getPassword())
-//                    .authorities(backendUser.getRoles()
-//                            .stream()
-//                            .map(SimpleGrantedAuthority::new)
-//                            .collect(Collectors.toList()))
-                    .roles(backendUser.getRoles())
+                    .authorities(backendUser.getRoles()
+                            .stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList()))
+//                    .roles(backendUser.getRoles())
                     .passwordEncoder((password) -> {
                         String combinedString = backendUser.getSalt() + password;
                         return DigestUtils.md5DigestAsHex(combinedString.getBytes(StandardCharsets.UTF_8));

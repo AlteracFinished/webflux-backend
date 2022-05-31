@@ -1,15 +1,11 @@
-package me.alterac.backend.webflux.service;
+package me.alterac.backend.webflux.mokito.service;
 
 import me.alterac.backend.webflux.entity.BackendUser;
 import me.alterac.backend.webflux.repository.BackendUserRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,7 +15,7 @@ import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 //@RunWith(MockitoJUnitRunner.class)
-public class BackendUserServiceTest {
+public class BackendUserServiceTests {
 
     @Test
     public void queryAdminAccount() {
@@ -40,7 +36,7 @@ public class BackendUserServiceTest {
                 .username("admin")
                 .password("5e5dd742ebb57e333ace01cf27308acc")
                 // .roles(new ArrayList<>())
-                .roles("ADMIN")
+                .roles(Collections.singletonList("ADMIN"))
                 .build();
     }
 }

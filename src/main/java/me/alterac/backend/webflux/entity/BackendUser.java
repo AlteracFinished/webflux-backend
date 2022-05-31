@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,5 +25,5 @@ public class BackendUser {
     @Column("login_at")
     private Instant loginAt;
 
-    private String roles;
+    private List<String> roles;
 }
