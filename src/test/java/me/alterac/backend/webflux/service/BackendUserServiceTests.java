@@ -1,4 +1,4 @@
-package me.alterac.backend.webflux.mokito.service;
+package me.alterac.backend.webflux.service;
 
 import me.alterac.backend.webflux.entity.BackendUser;
 import me.alterac.backend.webflux.repository.BackendUserRepository;

@@ -13,11 +13,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/hello")
-public class HelloController {
+@RequestMapping("/user")
+public class BackendUserController {
 
-    @GetMapping("")
-    private Mono<Map<String, String>> hello() {
+
+    @GetMapping("/getCurrentUser")
+    private Mono<Map<String, String>> getCurrentUser() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         Map<String, String> res = new HashMap<>();

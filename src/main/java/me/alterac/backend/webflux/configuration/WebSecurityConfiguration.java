@@ -1,6 +1,6 @@
 package me.alterac.backend.webflux.configuration;
 
-import me.alterac.backend.webflux.mokito.service.BackendUserService;
+import me.alterac.backend.webflux.service.BackendUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
@@ -27,6 +27,7 @@ public class WebSecurityConfiguration {
                 .csrf().disable()
                 .authorizeExchange()
                 // .pathMatchers(HttpMethod.POST, "/user/*").hasRole(ADMIN)
+                .pathMatchers("/user/getCurrentUser").hasRole("ADMIN")
                 .pathMatchers("/hello").permitAll()
                 .and()
                 .httpBasic()

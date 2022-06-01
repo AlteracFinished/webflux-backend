@@ -18,6 +18,7 @@
         <jasync-mysql.version>2.0.7</jasync-mysql.version>
         <r2dbc-mysql.version>0.8.2.RELEASE</r2dbc-mysql.version>
         <kotlin.version>1.6.21</kotlin.version>
+        <sprint-session.version>2.7.0</sprint-session.version>
     </properties>
     <dependencies>
         <dependency>
@@ -36,6 +37,22 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-core</artifactId>
+            <version>${sprint-session.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+            <version>${sprint-session.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.github.jasync-sql</groupId>

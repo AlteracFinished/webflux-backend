@@ -20,7 +20,6 @@ public class BackendUser {
     @Id
     private Long id;
     private String username;
-    private String salt;
     private String password;
     @Column("login_at")
     private Instant loginAt;
