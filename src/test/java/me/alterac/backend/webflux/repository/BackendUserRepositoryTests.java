@@ -1,6 +1,7 @@
 package me.alterac.backend.webflux.repository;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.alterac.backend.webflux.entity.BackendUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 
+@Slf4j
 @SpringBootTest
 public class BackendUserRepositoryTests {
 
@@ -18,7 +20,13 @@ public class BackendUserRepositoryTests {
 
     @Test
     public void addAdmin() {
-        repository.save(createAdmin());
+        repository.save(createAdmin()).block();
+    }
+
+    @Test
+    public void getAdmin() {
+        BackendUser user = repository.findByUsername("admin").blockFirst();
+        log.info("admin: {}", user);
     }
 
     static BackendUser createAdmin() {

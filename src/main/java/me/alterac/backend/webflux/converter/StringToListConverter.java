@@ -9,22 +9,24 @@ import org.springframework.data.convert.ReadingConverter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @ReadingConverter
 @AllArgsConstructor
-public class StringToListConverter implements Converter<String, ArrayList<String>> {
+public class StringToListConverter implements Converter<String, List<String>> {
 
     private final ObjectMapper objectMapper;
 
     @Override
-    public ArrayList<String> convert(String src) {
+    public List<String> convert(String src) {
         try {
-            return new ArrayList<>(objectMapper.readValue(src, new TypeReference<ArrayList<String>>() {}));
+            return objectMapper.readValue(src, new TypeReference<ArrayList<String>>() {});
         } catch (IOException e) {
             log.error("Problem while parsing JSON: {}", src, e);
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
 }

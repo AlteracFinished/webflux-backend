@@ -8,16 +8,17 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @WritingConverter
 @AllArgsConstructor
-public class ListToStringConverter implements Converter<ArrayList<String>, String> {
+public class ListToStringConverter implements Converter<List<String>, String> {
 
     private final ObjectMapper objectMapper;
 
     @Override
-    public String convert(ArrayList<String> src) {
+    public String convert(List<String> src) {
         try {
             return objectMapper.writeValueAsString(src);
         } catch (JsonProcessingException e) {
