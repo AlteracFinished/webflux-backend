@@ -8,12 +8,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
@@ -21,9 +23,17 @@ import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableReactiveMethodSecurity(proxyTargetClass = true)
 public class WebSecurityConfiguration {
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
+
+    @Bean
+    ServerAuthenticationConverter serverAuthenticationConverter(
+            ObjectMapper objectMapper
+    ) {
+        return new LoginJsonAuthConverter(objectMapper);
+    }
 
     @Bean
     public UserDetailsRepositoryReactiveAuthenticationManager authenticationManager(
@@ -53,7 +63,7 @@ public class WebSecurityConfiguration {
         AuthenticationWebFilter filter = new AuthenticationWebFilter(authenticationManager);
 
         filter.setSecurityContextRepository(securityContextRepository());
-        filter.setServerAuthenticationConverter(new LoginJsonAuthConverter(objectMapper));
+        filter.setServerAuthenticationConverter(serverAuthenticationConverter(objectMapper));
         filter.setRequiresAuthenticationMatcher(
                 ServerWebExchangeMatchers.pathMatchers(HttpMethod.POST, "/signIn")
         );
@@ -76,7 +86,6 @@ public class WebSecurityConfiguration {
                 .authorizeExchange()
                 .pathMatchers("/user/getCurrentUser").hasRole("ADMIN")
                 .pathMatchers("/**", "/login", "/logout", "/hello").permitAll()
-                .anyExchange().permitAll()
                 .and()
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         return http.build();

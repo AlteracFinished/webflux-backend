@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/signIn")
@@ -24,26 +27,9 @@ public class SignInController {
     private final ServerSecurityContextRepository securityContextRepository;
 
     @PostMapping("")
-    private Mono<Void> signIn(@RequestBody SignInRequest request, ServerWebExchange webExchange) {
-        return Mono.just(request)
-                .flatMap(form -> {
-                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                            form.getUsername(),
-                            form.getPassword()
-                    );
-
-                    return authenticationManager
-                            .authenticate(token)
-                            .doOnError(err -> {
-                                System.out.println(err.getMessage());
-                            })
-                            .flatMap(authentication -> {
-                                SecurityContextImpl securityContext = new SecurityContextImpl(authentication);
-
-                                return securityContextRepository
-                                        .save(webExchange, securityContext)
-                                        .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
-                            });
-                });
+    private Mono<Map<String, String>> signIn(ServerWebExchange webExchange) {
+        Map<String, String> res = new HashMap<>();
+        res.put("msg", "success");
+        return Mono.just(res);
     }
 }
