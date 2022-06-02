@@ -1,32 +1,20 @@
 package me.alterac.backend.webflux.service;
 
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import me.alterac.backend.webflux.repository.BackendUserRepository;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
+import me.alterac.backend.webflux.entity.BackendUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Component
-@AllArgsConstructor
-public class BackendUserService implements ReactiveUserDetailsService {
-    private final @NonNull BackendUserRepository repository;
+public interface BackendUserService {
 
-    @Override
-    public Mono<UserDetails> findByUsername(String username) {
-        return repository.findByUsername(username).map(backendUser -> {
-            if (backendUser == null) {
-                throw new UsernameNotFoundException(username);
-            }
-            return User.withUsername(username)
-                    .password(backendUser.getPassword())
-                    .roles(backendUser.getRoles().toArray(new String[0]))
-                    .build();
-        }).next();
-    }
+    Mono<BackendUser> getByUsername(String username);
+
+    Mono<BackendUser> createUser(String username, String password, String description);
+
+    Mono<Void> updatePassword(String username, String password);
+
+    Mono<Void> updateDescription(String username, String description);
+
+    Mono<Page<BackendUser>> findByPage(int pageNum, int limit);
 }

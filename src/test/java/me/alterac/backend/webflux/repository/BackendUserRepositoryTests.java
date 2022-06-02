@@ -25,7 +25,7 @@ public class BackendUserRepositoryTests {
 
     @Test
     public void getAdmin() {
-        BackendUser user = repository.findByUsername("admin").blockFirst();
+        BackendUser user = repository.findByUsername("admin").block();
         log.info("admin: {}", user);
     }
 

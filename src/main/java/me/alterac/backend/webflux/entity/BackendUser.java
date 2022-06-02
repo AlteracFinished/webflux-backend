@@ -15,14 +15,13 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("user")
+@Table("backend_user")
 public class BackendUser {
     @Id
     private Long id;
     private String username;
     private String password;
-    @Column("login_at")
-    private Instant loginAt;
+    private String description;
 
     private List<String> roles;
 }

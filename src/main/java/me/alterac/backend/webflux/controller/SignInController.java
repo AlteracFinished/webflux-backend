@@ -1,35 +1,39 @@
 package me.alterac.backend.webflux.controller;
 
 import lombok.AllArgsConstructor;
-import me.alterac.backend.webflux.entity.SignInRequest;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import lombok.extern.slf4j.Slf4j;
+import me.alterac.backend.webflux.entity.CommonResponse;
+import me.alterac.backend.webflux.entity.SignInResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
-
+@Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/signIn")
 public class SignInController {
 
-    private final ReactiveAuthenticationManager authenticationManager;
+    @PostMapping("/signIn")
+    private Mono<CommonResponse<SignInResponse>> signIn(Authentication authentication, WebSession webSession) {
+        UserDetails userDetails = ((UserDetails) authentication.getPrincipal());
+        log.info("User {} signed in", userDetails.getUsername());
+        return Mono.just(CommonResponse.createSuccessResponse(SignInResponse.builder()
+                .sessionId(webSession.getId())
+                .username(userDetails.getUsername())
+                .build()));
+    }
 
-    private final ServerSecurityContextRepository securityContextRepository;
+    @GetMapping("/signInFailed")
+    private Mono<CommonResponse<Void>> signInFailed() {
+        return Mono.just(CommonResponse.defaultFailedResponse());
+    }
 
-    @PostMapping("")
-    private Mono<Map<String, String>> signIn(ServerWebExchange webExchange) {
-        Map<String, String> res = new HashMap<>();
-        res.put("msg", "success");
-        return Mono.just(res);
+    @PostMapping("/signOut")
+    private Mono<CommonResponse<Void>> signOut() {
+        return Mono.just(CommonResponse.defaultSuccessResponse());
     }
 }

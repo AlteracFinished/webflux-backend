@@ -2,9 +2,12 @@ package me.alterac.backend.webflux.service;
 
 import me.alterac.backend.webflux.entity.BackendUser;
 import me.alterac.backend.webflux.repository.BackendUserRepository;
+import me.alterac.backend.webflux.security.Roles;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 
@@ -22,9 +25,9 @@ public class BackendUserServiceTests {
         String username = "admin";
 
         BackendUserRepository repository = mock(BackendUserRepository.class);
-        when(repository.findByUsername(anyString())).thenReturn(Flux.just(createAdmin()));
+        when(repository.findByUsername(anyString())).thenReturn(Mono.just(createAdmin()));
 
-        BackendUserService service = new BackendUserService(repository);
+        BackendUserServiceImpl service = new BackendUserServiceImpl(repository, new BCryptPasswordEncoder());
         UserDetails result = service.findByUsername(username).block();
         assertNotNull("User", result);
         assertTrue("Enabled", result.isEnabled());
@@ -36,7 +39,7 @@ public class BackendUserServiceTests {
                 .username("admin")
                 .password("5e5dd742ebb57e333ace01cf27308acc")
                 // .roles(new ArrayList<>())
-                .roles(Collections.singletonList("ADMIN"))
+                .roles(Collections.singletonList(Roles.ADMIN))
                 .build();
     }
 }

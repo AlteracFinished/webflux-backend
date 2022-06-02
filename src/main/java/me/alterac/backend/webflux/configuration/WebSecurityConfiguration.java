@@ -2,31 +2,36 @@ package me.alterac.backend.webflux.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.alterac.backend.webflux.security.LoginJsonAuthConverter;
-import me.alterac.backend.webflux.service.BackendUserService;
+import me.alterac.backend.webflux.security.Roles;
+import me.alterac.backend.webflux.service.BackendUserServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
-import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity(proxyTargetClass = true)
 public class WebSecurityConfiguration {
-    public static final String ADMIN = "ADMIN";
-    public static final String USER = "USER";
+
+    @Bean
+    PasswordEncoder defaultPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     ServerAuthenticationConverter serverAuthenticationConverter(
@@ -37,11 +42,11 @@ public class WebSecurityConfiguration {
 
     @Bean
     public UserDetailsRepositoryReactiveAuthenticationManager authenticationManager(
-            BackendUserService backendUserService
+            ReactiveUserDetailsService reactiveUserDetailsService
     ) {
         UserDetailsRepositoryReactiveAuthenticationManager authenticationManager
-                = new UserDetailsRepositoryReactiveAuthenticationManager(backendUserService);
-        authenticationManager.setPasswordEncoder(new BCryptPasswordEncoder());
+                = new UserDetailsRepositoryReactiveAuthenticationManager(reactiveUserDetailsService);
+        authenticationManager.setPasswordEncoder(defaultPasswordEncoder());
         return authenticationManager;
     }
 
@@ -67,6 +72,7 @@ public class WebSecurityConfiguration {
         filter.setRequiresAuthenticationMatcher(
                 ServerWebExchangeMatchers.pathMatchers(HttpMethod.POST, "/signIn")
         );
+        filter.setAuthenticationFailureHandler(new RedirectServerAuthenticationFailureHandler("/signInFailed"));
 
         return filter;
     }
@@ -81,13 +87,18 @@ public class WebSecurityConfiguration {
                 .cors().disable()
                 .httpBasic().disable()
                 .formLogin().disable()
+                .authorizeExchange()
+                .pathMatchers("/signIn").authenticated()
+                .pathMatchers("/hello/**", "/signInFailed", "/signOut").permitAll()
+                .pathMatchers("/user/**").hasAnyRole(Roles.ADMIN, Roles.USER)
+                .anyExchange()
+                .denyAll()
+                .and()
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository())
-                .authorizeExchange()
-                .pathMatchers("/user/getCurrentUser").hasRole("ADMIN")
-                .pathMatchers("/**", "/login", "/logout", "/hello").permitAll()
-                .and()
-                .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION);
+                .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .logout()
+                .logoutUrl("/signOut");
         return http.build();
     }
 }
