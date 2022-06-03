@@ -14,6 +14,7 @@ public class BackendUserToGetResponseConverter implements Converter<BackendUser,
         return BackendUserGetResponse.builder()
                 .username(source.getUsername())
                 .description(source.getDescription())
+                .roles(source.getRoles())
                 .build();
     }
 }
