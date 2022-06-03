@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.alterac.backend.webflux.entity.BackendUser;
 import me.alterac.backend.webflux.repository.BackendUserRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -65,8 +62,10 @@ public class BackendUserServiceImpl implements ReactiveUserDetailsService, Backe
 
     @Override
     public Mono<Page<BackendUser>> findByPage(int pageNum, int limit) {
-        PageRequest pageable = PageRequest.of(pageNum, limit)
-                .withSort(Sort.by("id").descending());
-        return repository.findAll(pageable);
+        PageRequest pageRequest = PageRequest.of(pageNum, limit);
+        return repository.findAllBy(pageRequest)
+                .collectList()
+                .zipWith(this.repository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 }

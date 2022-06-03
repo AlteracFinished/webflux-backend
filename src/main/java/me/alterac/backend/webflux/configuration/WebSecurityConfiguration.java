@@ -22,6 +22,8 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
+import org.springframework.web.server.session.HeaderWebSessionIdResolver;
+import org.springframework.web.server.session.WebSessionIdResolver;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -75,6 +77,13 @@ public class WebSecurityConfiguration {
         filter.setAuthenticationFailureHandler(new RedirectServerAuthenticationFailureHandler("/signInFailed"));
 
         return filter;
+    }
+
+    @Bean
+    public WebSessionIdResolver webSessionIdResolver() {
+        HeaderWebSessionIdResolver resolver = new HeaderWebSessionIdResolver();
+        resolver.setHeaderName("SESSION");
+        return resolver;
     }
 
     @Bean

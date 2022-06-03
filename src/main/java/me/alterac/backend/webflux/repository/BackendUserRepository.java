@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Modifying;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface BackendUserRepository extends R2dbcRepository<BackendUser, Long> {
@@ -20,5 +21,5 @@ public interface BackendUserRepository extends R2dbcRepository<BackendUser, Long
 
     Mono<BackendUser> findByUsername(String username);
 
-    Mono<Page<BackendUser>> findAll(Pageable pageable);
+    Flux<BackendUser> findAllBy(Pageable pageable);
 }
