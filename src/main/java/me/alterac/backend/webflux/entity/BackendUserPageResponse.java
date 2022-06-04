@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class BackendUserPageResponse {
     private List<BackendUserGetResponse> userList;
-    private int total;
+    private long total;
 }

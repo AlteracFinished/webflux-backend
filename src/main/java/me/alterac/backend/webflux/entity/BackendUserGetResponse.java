@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BackendUserGetResponse {
+    private Long id;
     private String username;
     private String description;
     private List<String> roles;

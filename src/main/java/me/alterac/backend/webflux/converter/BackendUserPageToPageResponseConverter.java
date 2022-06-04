@@ -24,9 +24,15 @@ public class BackendUserPageToPageResponseConverter implements Converter<Page<Ba
         return BackendUserPageResponse.builder()
                 .userList(source.getContent()
                         .stream()
-                        .map(backendUser -> Objects.requireNonNull(conversionService.convert(backendUser)))
+                        //.map(backendUser -> Objects.requireNonNull(conversionService.convert(backendUser)))
+                        .map(backendUser -> BackendUserGetResponse.builder()
+                                .id(backendUser.getId())
+                                .username(backendUser.getUsername())
+                                .description(backendUser.getDescription())
+                                .roles(backendUser.getRoles())
+                                .build())
                         .collect(Collectors.toList()))
-                .total(source.getTotalPages())
+                .total(source.getTotalElements())
                 .build();
     }
 }

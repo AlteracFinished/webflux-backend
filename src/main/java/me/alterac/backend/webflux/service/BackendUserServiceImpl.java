@@ -66,7 +66,7 @@ public class BackendUserServiceImpl implements ReactiveUserDetailsService, Backe
 
     @Override
     public Mono<Page<BackendUser>> findByPage(int pageNum, int limit) {
-        PageRequest pageRequest = PageRequest.of(pageNum, limit);
+        PageRequest pageRequest = PageRequest.of(pageNum, limit).withSort(Sort.by("id").descending());
         return repository.findAllBy(pageRequest)
                 .collectList()
                 .zipWith(this.repository.count())

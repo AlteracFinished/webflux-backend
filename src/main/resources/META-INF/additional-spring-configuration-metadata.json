@@ -4,6 +4,11 @@
       "name": "allowed-origin",
       "type": "java.lang.String",
       "description": "CORS host setting."
+    },
+    {
+      "name": "print-stacktrace",
+      "type": "java.lang.String",
+      "description": "Print stacktrace in response."
     }
   ]
 }

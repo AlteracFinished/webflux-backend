@@ -36,7 +36,7 @@ public class BackendUserControllerTests {
                 .uri(uriBuilder ->
                         uriBuilder
                                 .path("/user/findByPage")
-                                .queryParam("pageNum", 0)
+                                .queryParam("pageNum", 1)
                                 .queryParam("limit", 10)
                                 .build())
                 .accept(MediaType.APPLICATION_JSON)

@@ -12,16 +12,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.session.data.redis.ReactiveRedisSessionRepository;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -75,28 +73,27 @@ public class BackendUserController {
 
     @PostMapping("/updatePassword")
     private Mono<CommonResponse<Void>> updatePassword(
-            @RequestParam("username") String username,
-            @RequestParam("password") String password
+            @RequestBody BackendUserPasswordUpdateRequest request
     ) {
-        return backendUserService.updatePassword(username, password)
+        return backendUserService.updatePassword(request.getUsername(), request.getPassword())
                 .thenReturn(CommonResponse.defaultSuccessResponse());
     }
 
     @PostMapping("/updateDescription")
     private Mono<CommonResponse<Void>> updateDescription(
-            @RequestParam("username") String username,
-            @RequestParam("description") String description
+            @RequestBody BackendUserUpdateRequest request
     ) {
-        return backendUserService.updateDescription(username, description)
+        return backendUserService.updateDescription(request.getUsername(), request.getDescription())
                 .thenReturn(CommonResponse.defaultSuccessResponse());
     }
 
     @GetMapping("/findByPage")
+    @Validated
     private Mono<CommonResponse<BackendUserPageResponse>> findByPage(
-            @PositiveOrZero(message = "pageNum") @RequestParam("pageNum") Integer pageNum,
-            @Positive(message = "limit") @RequestParam("limit") Integer limit
+            @Positive @RequestParam("pageNum") Integer pageNum,
+            @Positive @RequestParam("limit") Integer limit
     ) {
-        return backendUserService.findByPage(pageNum, limit)
+        return backendUserService.findByPage(pageNum - 1, limit)
                 .map(page -> (BackendUserPageResponse) Objects.requireNonNull(conversionService.convert(
                         page,
                         new TypeDescriptor(

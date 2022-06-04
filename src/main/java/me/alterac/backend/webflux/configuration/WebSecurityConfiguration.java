@@ -3,10 +3,15 @@ package me.alterac.backend.webflux.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.alterac.backend.webflux.security.LoginJsonAuthConverter;
 import me.alterac.backend.webflux.security.Roles;
+import me.alterac.backend.webflux.security.GlobalExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.springframework.boot.web.reactive.error.ErrorAttributes;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -20,19 +25,19 @@ import org.springframework.security.web.server.authentication.AuthenticationWebF
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.authentication.logout.RedirectServerLogoutSuccessHandler;
-import org.springframework.security.web.server.authentication.logout.ServerLogoutSuccessHandler;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.session.HeaderWebSessionIdResolver;
 import org.springframework.web.server.session.WebSessionIdResolver;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -110,6 +115,33 @@ public class WebSecurityConfiguration {
         return source;
     }
 
+//    @Bean
+    public WebExceptionHandler exceptionHandler() {
+        return (ServerWebExchange exchange, Throwable ex) -> {
+            if (ex instanceof IllegalArgumentException) {
+                exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
+                return exchange.getResponse().setComplete();
+            }
+            return Mono.error(ex);
+        };
+    }
+
+    @Bean
+    public WebProperties.Resources resources() {
+        return new WebProperties.Resources();
+    }
+
+    @Bean
+    public GlobalExceptionHandler globalExceptionHandler(
+            @Value("${print-stacktrace:true}") Boolean printStackTrace,
+            ErrorAttributes errorAttributes,
+            WebProperties.Resources resources,
+            ApplicationContext applicationContext
+    ) {
+        return new GlobalExceptionHandler(errorAttributes, resources, applicationContext, printStackTrace);
+    }
+
+
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(
             ServerHttpSecurity http,
@@ -127,7 +159,8 @@ public class WebSecurityConfiguration {
                 .pathMatchers(HttpMethod.POST, "/signIn").authenticated()
                 .pathMatchers(HttpMethod.OPTIONS, "/signIn").permitAll()
                 .pathMatchers("/signInFailed", "/signOut").permitAll()
-                .pathMatchers("/user/**").hasAnyRole(Roles.ADMIN, Roles.USER)
+                .pathMatchers("/user/getCurrentUser").hasAnyRole(Roles.ADMIN, Roles.USER)
+                .pathMatchers("/user/**").hasAnyRole(Roles.ADMIN)
                 .anyExchange()
                 .denyAll()
                 .and()
