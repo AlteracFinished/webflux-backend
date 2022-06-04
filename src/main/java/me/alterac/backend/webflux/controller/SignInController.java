@@ -6,9 +6,7 @@ import me.alterac.backend.webflux.entity.CommonResponse;
 import me.alterac.backend.webflux.entity.SignInResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
@@ -32,7 +30,7 @@ public class SignInController {
         return Mono.just(CommonResponse.defaultFailedResponse());
     }
 
-    @PostMapping("/signOut")
+    @RequestMapping(value = "/signOut", method = {RequestMethod.GET, RequestMethod.POST})
     private Mono<CommonResponse<Void>> signOut() {
         return Mono.just(CommonResponse.defaultSuccessResponse());
     }

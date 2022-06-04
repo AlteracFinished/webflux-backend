@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.alterac.backend.webflux.entity.BackendUser;
 import me.alterac.backend.webflux.repository.BackendUserRepository;
+import me.alterac.backend.webflux.security.Roles;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
@@ -13,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
 
 @Component
 @AllArgsConstructor
@@ -46,6 +49,7 @@ public class BackendUserServiceImpl implements ReactiveUserDetailsService, Backe
                         .username(username)
                         .password(passwordEncoder.encode(password))
                         .description(description)
+                        .roles(Collections.singletonList(Roles.USER))
                         .build()
         );
     }

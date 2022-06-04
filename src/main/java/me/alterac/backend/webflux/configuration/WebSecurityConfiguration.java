@@ -3,7 +3,7 @@ package me.alterac.backend.webflux.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.alterac.backend.webflux.security.LoginJsonAuthConverter;
 import me.alterac.backend.webflux.security.Roles;
-import me.alterac.backend.webflux.service.BackendUserServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,11 +19,21 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
+import org.springframework.security.web.server.authentication.logout.RedirectServerLogoutSuccessHandler;
+import org.springframework.security.web.server.authentication.logout.ServerLogoutSuccessHandler;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.session.HeaderWebSessionIdResolver;
 import org.springframework.web.server.session.WebSessionIdResolver;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -87,18 +97,36 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
+    public CorsConfigurationSource configurationSource(@Value("${allowed-origin:*}") String allowedOrigin) {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedOrigins(Collections.singletonList(allowedOrigin));
+        corsConfig.setMaxAge(8000L);
+        corsConfig.addAllowedMethod("*");
+        corsConfig.addAllowedHeader("*");
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return source;
+    }
+
+    @Bean
     public SecurityWebFilterChain springSecurityFilterChain(
             ServerHttpSecurity http,
             UserDetailsRepositoryReactiveAuthenticationManager authenticationManager,
-            AuthenticationWebFilter authenticationWebFilter
+            AuthenticationWebFilter authenticationWebFilter,
+            CorsConfigurationSource configurationSource
     ) {
+        RedirectServerLogoutSuccessHandler logoutSuccessHandler = new RedirectServerLogoutSuccessHandler();
+        logoutSuccessHandler.setLogoutSuccessUrl(URI.create("/signOut"));
+
         http.csrf().disable()
-                .cors().disable()
                 .httpBasic().disable()
                 .formLogin().disable()
                 .authorizeExchange()
-                .pathMatchers("/signIn").authenticated()
-                .pathMatchers("/hello/**", "/signInFailed", "/signOut").permitAll()
+                .pathMatchers(HttpMethod.POST, "/signIn").authenticated()
+                .pathMatchers(HttpMethod.OPTIONS, "/signIn").permitAll()
+                .pathMatchers("/signInFailed", "/signOut").permitAll()
                 .pathMatchers("/user/**").hasAnyRole(Roles.ADMIN, Roles.USER)
                 .anyExchange()
                 .denyAll()
@@ -107,7 +135,10 @@ public class WebSecurityConfiguration {
                 .securityContextRepository(securityContextRepository())
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .logout()
-                .logoutUrl("/signOut");
+                .logoutUrl("/signOut")
+                .logoutSuccessHandler(logoutSuccessHandler)
+                .and()
+                .cors().configurationSource(configurationSource);
         return http.build();
     }
 }

@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "allowed-origin",
+      "type": "java.lang.String",
+      "description": "CORS host setting."
+    }
+  ]
+}
