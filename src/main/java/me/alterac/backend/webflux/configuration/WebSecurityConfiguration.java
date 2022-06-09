@@ -162,7 +162,7 @@ public class WebSecurityConfiguration {
                 .pathMatchers("/user/getCurrentUser").hasAnyRole(Roles.ADMIN, Roles.USER)
                 .pathMatchers("/user/**").hasAnyRole(Roles.ADMIN)
                 .anyExchange()
-                .denyAll()
+                .authenticated()
                 .and()
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository())

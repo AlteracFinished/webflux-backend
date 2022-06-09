@@ -1,0 +1,19 @@
+spring:
+  r2dbc:
+    url: 'r2dbcs:pool:mysql://localhost:3306/'
+    username: root
+    password:
+
+  redis:
+    host: localhost
+    password:
+  jackson:
+    default-property-inclusion: non_null
+
+logging:
+  level:
+    me.alterac.backen.webflux.controller.SignInController: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

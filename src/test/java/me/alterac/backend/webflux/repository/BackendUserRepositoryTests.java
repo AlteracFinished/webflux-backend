@@ -3,9 +3,11 @@ package me.alterac.backend.webflux.repository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.alterac.backend.webflux.entity.BackendUser;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.r2dbc.UncategorizedR2dbcException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -20,7 +22,9 @@ public class BackendUserRepositoryTests {
 
     @Test
     public void addAdmin() {
-        repository.save(createAdmin()).block();
+        Assertions.assertThrows(UncategorizedR2dbcException.class, () -> {
+            repository.save(createAdmin()).block();
+        });
     }
 
     @Test
